@@ -3,6 +3,8 @@ import numpy as np
 import pandas as pd
 import joblib
 import time
+import shap
+import matplotlib.pyplot as plt
 
 st.set_page_config(
     page_title="Advanced House Price Predictor",
@@ -115,3 +117,24 @@ if predict_button:
                 mime="text/csv",
                 use_container_width=True
             )
+
+        # --- EXPLAINABLE AI (SHAP) SECTION ---
+        st.markdown("---")
+        st.subheader("🧠 Explainable AI: Price Drivers")
+        st.info("The chart below explains how each feature influenced the final predicted price. Red bars push the price higher, while blue bars pull it lower.")
+        
+        with st.spinner('Generating AI explanation...'):
+            feature_names = [
+                'Overall Quality', 'Total Sq Ft', 'Garage Cars', 'Central Air', 
+                'Full Bathrooms', 'Fireplaces', 'House Age', 'Total Rooms', 'Total Bedrooms'
+            ]
+            
+            input_df = pd.DataFrame(input_data, columns=feature_names)
+            
+            explainer = shap.Explainer(model)
+            shap_values = explainer(input_df)
+            
+            fig, ax = plt.subplots(figsize=(10, 5))
+            shap.plots.waterfall(shap_values[0], show=False)
+            
+            st.pyplot(fig, clear_figure=True)
