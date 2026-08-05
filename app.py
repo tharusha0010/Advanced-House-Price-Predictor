@@ -13,6 +13,9 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
+if 'prediction_history' not in st.session_state:
+    st.session_state['prediction_history'] = []
+
 @st.cache_resource
 def load_ml_model():
     try:
@@ -95,6 +98,19 @@ if predict_button:
             predicted_log_price = model.predict(input_data)[0]
             actual_price = np.exp(predicted_log_price)
             
+            st.session_state['prediction_history'].append({
+                "Quality (1-10)": overall_qual,
+                "Sq Feet": total_sf,
+                "Age (Yrs)": house_age,
+                "Rooms": tot_rms,
+                "Bedrooms": bedrooms,
+                "Baths": full_bath,
+                "Garage (Cars)": garage_cars,
+                "Fireplaces": fireplaces,
+                "Central Air": central_air,
+                "Estimated Value ($)": f"{actual_price:,.2f}"
+            })
+            
         with col_result:
             st.metric(label="Estimated Market Value", value=f"${actual_price:,.2f}")
             
@@ -141,3 +157,19 @@ if predict_button:
             shap.plots.waterfall(shap_values[0], show=False)
             
             st.pyplot(fig, clear_figure=True)
+
+st.markdown("---")
+st.subheader("📊 Prediction History & Comparison")
+
+if st.session_state['prediction_history']:
+    history_df = pd.DataFrame(st.session_state['prediction_history'])
+    
+    history_df.index = np.arange(1, len(history_df) + 1)
+    
+    st.dataframe(history_df, use_container_width=True)
+    
+    if st.button("🗑️ Clear History", type="secondary"):
+        st.session_state['prediction_history'] = []
+        st.rerun()
+else:
+    st.info("No prediction history yet. Predict a price to see the comparison table here.")
