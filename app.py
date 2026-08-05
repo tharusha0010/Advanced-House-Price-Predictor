@@ -44,8 +44,7 @@ col1, col2, col3 = st.columns(3)
 with col1:
     st.markdown("#### 📐 Structure & Quality")
     overall_qual = st.slider('Overall Quality (1-10)', 1, 10, 5, help="1 = Very Poor, 10 = Very Excellent")
-    # Set a practical minimum limit (100) and removed the upper limit
-    total_sf = st.number_input('Total Square Feet', min_value=100, value=2000, step=100)
+    total_sf = st.number_input('Total Square Feet', value=2000, step=100)
     house_age = st.number_input('House Age (Years)', 0, 150, 10, step=1)
 
 with col2:
@@ -73,7 +72,12 @@ with col_btn:
 if predict_button:
     is_valid = True
     
-    if bedrooms > tot_rms:
+    # Custom Validation for Minimum Square Feet
+    if total_sf < 100:
+        st.error("❌ Validation Error: Total square feet must be at least 100. Please enter a valid property size.")
+        is_valid = False
+        
+    elif bedrooms > tot_rms:
         st.error("❌ Validation Error: Total bedrooms cannot exceed the total number of rooms.")
         is_valid = False
         
