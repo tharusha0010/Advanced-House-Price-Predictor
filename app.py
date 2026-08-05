@@ -44,7 +44,8 @@ col1, col2, col3 = st.columns(3)
 with col1:
     st.markdown("#### 📐 Structure & Quality")
     overall_qual = st.slider('Overall Quality (1-10)', 1, 10, 5, help="1 = Very Poor, 10 = Very Excellent")
-    total_sf = st.number_input('Total Square Feet', 500, 10000, 2000, step=100)
+    # Set a practical minimum limit (100) and removed the upper limit
+    total_sf = st.number_input('Total Square Feet', min_value=100, value=2000, step=100)
     house_age = st.number_input('House Age (Years)', 0, 150, 10, step=1)
 
 with col2:
