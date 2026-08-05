@@ -22,6 +22,10 @@ An end-to-end Machine Learning web application designed to predict residential p
 ![Prediction History Table](images/preview_03.png)
 *An interactive session-state table that tracks multiple property evaluations side-by-side, allowing users to easily compare different properties and export the complete history as a professional PDF.*
 
+### 4. High-Accuracy Model Performance
+![R² Score Calculation](images/preview_04.png)
+*A snippet from the data science notebook demonstrating the XGBoost model's accuracy. The model achieved an outstanding **R² Score of 0.9387** on the unseen test dataset, indicating high predictive reliability.*
+
 ---
 
 ## 🚀 Key Features
