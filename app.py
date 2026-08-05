@@ -6,6 +6,7 @@ import time
 import shap
 import matplotlib.pyplot as plt
 from fpdf import FPDF
+from fpdf.enums import XPos, YPos
 
 st.set_page_config(
     page_title="Advanced House Price Predictor",
@@ -26,32 +27,32 @@ def load_ml_model():
 
 model = load_ml_model()
 
-# Helper function to generate PDF for a single property report
+# Helper function to generate PDF for a single property report (fixed deprecation)
 def generate_property_pdf(data_dict):
     pdf = FPDF()
     pdf.add_page()
     pdf.set_font("helvetica", "B", 16)
-    pdf.cell(0, 10, "Property Valuation Report", 0, 1, "C")
+    pdf.cell(0, 10, "Property Valuation Report", new_x=XPos.LMARGIN, new_y=YPos.NEXT, align="C")
     pdf.set_font("helvetica", "", 10)
-    pdf.cell(0, 8, "Advanced House Price Predictor - AI Valuation", 0, 1, "C")
+    pdf.cell(0, 8, "Advanced House Price Predictor - AI Valuation", new_x=XPos.LMARGIN, new_y=YPos.NEXT, align="C")
     pdf.ln(5)
     
     pdf.set_font("helvetica", "B", 12)
-    pdf.cell(0, 10, "Property Specifications & Estimated Value:", 0, 1, "L")
+    pdf.cell(0, 10, "Property Specifications & Estimated Value:", new_x=XPos.LMARGIN, new_y=YPos.NEXT, align="L")
     pdf.set_font("helvetica", "", 11)
     
     for key, value in data_dict.items():
         pdf.cell(100, 8, f"{key}:", border=1)
-        pdf.cell(90, 8, f"{value}", border=1, ln=1)
+        pdf.cell(90, 8, f"{value}", border=1, new_x=XPos.LMARGIN, new_y=YPos.NEXT)
         
     return bytes(pdf.output())
 
-# Helper function to generate PDF for prediction history table
+# Helper function to generate PDF for prediction history table (fixed deprecation)
 def generate_history_pdf(history_list):
     pdf = FPDF(orientation='L', unit='mm', format='A4')  # Landscape orientation for wide table
     pdf.add_page()
     pdf.set_font("helvetica", "B", 16)
-    pdf.cell(0, 10, "Prediction History & Comparison Report", 0, 1, "C")
+    pdf.cell(0, 10, "Prediction History & Comparison Report", new_x=XPos.LMARGIN, new_y=YPos.NEXT, align="C")
     pdf.ln(5)
     
     if not history_list:
@@ -84,7 +85,7 @@ with st.sidebar:
         "and structural features to estimate the real estate market value."
     )
     st.markdown("---")
-    st.markdown("🚀 **Version:** 1.1.0")
+    st.markdown("🚀 **Version:** 1.1.1")
     st.markdown("🧠 **Core AI Model:** XGBoost")
 
 st.title('🏘️ Advanced House Price Predictor')
@@ -120,7 +121,7 @@ col_btn, col_result = st.columns([1, 2])
 
 with col_btn:
     st.markdown("<br>", unsafe_allow_html=True)
-    predict_button = st.button('🎯 Predict Price', use_container_width=True, type="primary")
+    predict_button = st.button('🎯 Predict Price', width="stretch", type="primary")
 
 if predict_button:
     is_valid = True
@@ -184,7 +185,7 @@ if predict_button:
                 data=pdf_bytes,
                 file_name="Property_Valuation_Report.pdf",
                 mime="application/pdf",
-                use_container_width=True
+                width="stretch"
             )
 
         st.markdown("---")
@@ -214,7 +215,7 @@ if st.session_state['prediction_history']:
     history_df = pd.DataFrame(st.session_state['prediction_history'])
     history_df.index = np.arange(1, len(history_df) + 1)
     
-    st.dataframe(history_df, use_container_width=True)
+    st.dataframe(history_df, width="stretch")
     
     col_hist_btn1, col_hist_btn2 = st.columns(2)
     
@@ -225,11 +226,11 @@ if st.session_state['prediction_history']:
             data=history_pdf_bytes,
             file_name="Prediction_History_Report.pdf",
             mime="application/pdf",
-            use_container_width=True
+            width="stretch"
         )
         
     with col_hist_btn2:
-        if st.button("🗑️ Clear History", type="secondary", use_container_width=True):
+        if st.button("🗑️ Clear History", type="secondary", width="stretch"):
             st.session_state['prediction_history'] = []
             st.rerun()
 else:
