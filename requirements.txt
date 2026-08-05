@@ -1,9 +1,9 @@
-pandas
-numpy
-scikit-learn
-xgboost
-lightgbm
-matplotlib
-seaborn
 streamlit
+xgboost
+scikit-learn
 shap
+numpy
+pandas
+matplotlib
+joblib
+fpdf2
