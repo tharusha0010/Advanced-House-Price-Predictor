@@ -5,6 +5,7 @@ import joblib
 import time
 import shap
 import matplotlib.pyplot as plt
+from fpdf import FPDF
 
 st.set_page_config(
     page_title="Advanced House Price Predictor",
@@ -25,6 +26,55 @@ def load_ml_model():
 
 model = load_ml_model()
 
+# Helper function to generate PDF for a single property report
+def generate_property_pdf(data_dict):
+    pdf = FPDF()
+    pdf.add_page()
+    pdf.set_font("helvetica", "B", 16)
+    pdf.cell(0, 10, "Property Valuation Report", 0, 1, "C")
+    pdf.set_font("helvetica", "", 10)
+    pdf.cell(0, 8, "Advanced House Price Predictor - AI Valuation", 0, 1, "C")
+    pdf.ln(5)
+    
+    pdf.set_font("helvetica", "B", 12)
+    pdf.cell(0, 10, "Property Specifications & Estimated Value:", 0, 1, "L")
+    pdf.set_font("helvetica", "", 11)
+    
+    for key, value in data_dict.items():
+        pdf.cell(100, 8, f"{key}:", border=1)
+        pdf.cell(90, 8, f"{value}", border=1, ln=1)
+        
+    return bytes(pdf.output())
+
+# Helper function to generate PDF for prediction history table
+def generate_history_pdf(history_list):
+    pdf = FPDF(orientation='L', unit='mm', format='A4')  # Landscape orientation for wide table
+    pdf.add_page()
+    pdf.set_font("helvetica", "B", 16)
+    pdf.cell(0, 10, "Prediction History & Comparison Report", 0, 1, "C")
+    pdf.ln(5)
+    
+    if not history_list:
+        return bytes(pdf.output())
+        
+    keys = list(history_list[0].keys())
+    col_width = 270 / len(keys)  # Distribute width across A4 landscape page
+    
+    # Table Header
+    pdf.set_font("helvetica", "B", 8)
+    for key in keys:
+        pdf.cell(col_width, 8, str(key)[:15], border=1, align="C")
+    pdf.ln()
+    
+    # Table Rows
+    pdf.set_font("helvetica", "", 8)
+    for row in history_list:
+        for key in keys:
+            pdf.cell(col_width, 7, str(row[key]), border=1, align="C")
+        pdf.ln()
+        
+    return bytes(pdf.output())
+
 with st.sidebar:
     st.image("https://cdn-icons-png.flaticon.com/512/619/619153.png", width=120)
     st.title("About the Project")
@@ -34,7 +84,7 @@ with st.sidebar:
         "and structural features to estimate the real estate market value."
     )
     st.markdown("---")
-    st.markdown("🚀 **Version:** 1.0.0")
+    st.markdown("🚀 **Version:** 1.1.0")
     st.markdown("🧠 **Core AI Model:** XGBoost")
 
 st.title('🏘️ Advanced House Price Predictor')
@@ -99,42 +149,41 @@ if predict_button:
             actual_price = np.exp(predicted_log_price)
             
             st.session_state['prediction_history'].append({
-                "Quality (1-10)": overall_qual,
-                "Sq Feet": total_sf,
-                "Age (Yrs)": house_age,
+                "Quality": overall_qual,
+                "Sq Ft": total_sf,
+                "Age": house_age,
                 "Rooms": tot_rms,
-                "Bedrooms": bedrooms,
+                "Beds": bedrooms,
                 "Baths": full_bath,
-                "Garage (Cars)": garage_cars,
+                "Garage": garage_cars,
                 "Fireplaces": fireplaces,
-                "Central Air": central_air,
-                "Estimated Value ($)": f"{actual_price:,.2f}"
+                "Air": central_air,
+                "Est. Value ($)": f"{actual_price:,.2f}"
             })
             
         with col_result:
             st.metric(label="Estimated Market Value", value=f"${actual_price:,.2f}")
             
             report_data = {
-                "Overall Quality (1-10)": [overall_qual],
-                "Total Square Feet": [total_sf],
-                "House Age (Years)": [house_age],
-                "Total Rooms": [tot_rms],
-                "Total Bedrooms": [bedrooms],
-                "Full Bathrooms": [full_bath],
-                "Garage Capacity (Cars)": [garage_cars],
-                "Fireplaces": [fireplaces],
-                "Central Air": [central_air],
-                "Estimated Market Value ($)": [round(actual_price, 2)]
+                "Overall Quality (1-10)": overall_qual,
+                "Total Square Feet": total_sf,
+                "House Age (Years)": house_age,
+                "Total Rooms": tot_rms,
+                "Total Bedrooms": bedrooms,
+                "Full Bathrooms": full_bath,
+                "Garage Capacity (Cars)": garage_cars,
+                "Fireplaces": fireplaces,
+                "Central Air": central_air,
+                "Estimated Market Value ($)": f"${actual_price:,.2f}"
             }
             
-            report_df = pd.DataFrame(report_data)
-            csv_data = report_df.to_csv(index=False).encode('utf-8')
+            pdf_bytes = generate_property_pdf(report_data)
             
             st.download_button(
-                label="📄 Download Property Report (CSV)",
-                data=csv_data,
-                file_name="Property_Valuation_Report.csv",
-                mime="text/csv",
+                label="📄 Download Property Report (PDF)",
+                data=pdf_bytes,
+                file_name="Property_Valuation_Report.pdf",
+                mime="application/pdf",
                 use_container_width=True
             )
 
@@ -163,13 +212,25 @@ st.subheader("📊 Prediction History & Comparison")
 
 if st.session_state['prediction_history']:
     history_df = pd.DataFrame(st.session_state['prediction_history'])
-    
     history_df.index = np.arange(1, len(history_df) + 1)
     
     st.dataframe(history_df, use_container_width=True)
     
-    if st.button("🗑️ Clear History", type="secondary"):
-        st.session_state['prediction_history'] = []
-        st.rerun()
+    col_hist_btn1, col_hist_btn2 = st.columns(2)
+    
+    with col_hist_btn1:
+        history_pdf_bytes = generate_history_pdf(st.session_state['prediction_history'])
+        st.download_button(
+            label="📄 Download History Report (PDF)",
+            data=history_pdf_bytes,
+            file_name="Prediction_History_Report.pdf",
+            mime="application/pdf",
+            use_container_width=True
+        )
+        
+    with col_hist_btn2:
+        if st.button("🗑️ Clear History", type="secondary", use_container_width=True):
+            st.session_state['prediction_history'] = []
+            st.rerun()
 else:
     st.info("No prediction history yet. Predict a price to see the comparison table here.")
