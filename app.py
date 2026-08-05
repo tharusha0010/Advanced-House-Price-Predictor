@@ -1,5 +1,6 @@
 import streamlit as st
 import numpy as np
+import pandas as pd
 import joblib
 import time
 
@@ -90,3 +91,27 @@ if predict_button:
             
         with col_result:
             st.metric(label="Estimated Market Value", value=f"${actual_price:,.2f}")
+            
+            report_data = {
+                "Overall Quality (1-10)": [overall_qual],
+                "Total Square Feet": [total_sf],
+                "House Age (Years)": [house_age],
+                "Total Rooms": [tot_rms],
+                "Total Bedrooms": [bedrooms],
+                "Full Bathrooms": [full_bath],
+                "Garage Capacity (Cars)": [garage_cars],
+                "Fireplaces": [fireplaces],
+                "Central Air": [central_air],
+                "Estimated Market Value ($)": [round(actual_price, 2)]
+            }
+            
+            report_df = pd.DataFrame(report_data)
+            csv_data = report_df.to_csv(index=False).encode('utf-8')
+            
+            st.download_button(
+                label="📄 Download Property Report (CSV)",
+                data=csv_data,
+                file_name="Property_Valuation_Report.csv",
+                mime="text/csv",
+                use_container_width=True
+            )
