@@ -23,7 +23,7 @@ def load_ml_model():
 model = load_ml_model()
 
 with st.sidebar:
-    st.image("https://cdn-icons-png.flaticon.com/512/1018/1018671.png", width=120)
+    st.image("https://cdn-icons-png.flaticon.com/512/619/619153.png", width=120)
     st.title("About the Project")
     st.info(
         "This Machine Learning Web App leverages an XGBoost Regression model "
@@ -72,7 +72,6 @@ with col_btn:
 if predict_button:
     is_valid = True
     
-    # Custom Validation for Minimum Square Feet
     if total_sf < 100:
         st.error("❌ Validation Error: Total square feet must be at least 100. Please enter a valid property size.")
         is_valid = False
@@ -123,7 +122,6 @@ if predict_button:
                 use_container_width=True
             )
 
-        # --- EXPLAINABLE AI (SHAP) SECTION ---
         st.markdown("---")
         st.subheader("🧠 Explainable AI: Price Drivers")
         st.info("The chart below explains how each feature influenced the final predicted price. Red bars push the price higher, while blue bars pull it lower.")
